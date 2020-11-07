@@ -1,6 +1,7 @@
-from django.shortcuts import render
+import random
+from django.urls import reverse
+from django.shortcuts import render, redirect
 from markdown2 import Markdown
-
 from . import util
 
 
@@ -9,9 +10,10 @@ def index(request):
         "entries": util.list_entries()
     })
 
-def entry(request, title):
+def entry(request, title): 
     mrkdown = Markdown()
-    entry = mrkdown.convert(util.get_entry(title))
+    result = util.get_entry(title)
+    entry = mrkdown.convert(result) if result is not None else None
 
     if entry:
         return render(request, "encyclopedia/entry.html", {
@@ -20,3 +22,9 @@ def entry(request, title):
         })
 
     return render(request, "encyclopedia/error.html")
+
+def random_page(request):
+    return redirect(reverse("entry",
+                            kwargs={
+                                "title": random.choice(util.list_entries())
+                            }))
